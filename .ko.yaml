@@ -1,0 +1,1 @@
+defaultBaseImage: docker.io/python:3.8.20-alpine

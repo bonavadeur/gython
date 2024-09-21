@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gython
+  namespace: default
+spec:
+  selector:
+    app: gython
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gython
+  namespace: default
+  labels:
+    app: gython
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gython
+  template:
+    metadata:
+      labels:
+        app: gython
+    spec:
+      hostname: gython
+      containers:
+      - name: gython
+        image: docker.io/bonavadeur/gython:root
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: gython
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - node1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gython
+  namespace: default
+data:
+  enable-python: "false"
